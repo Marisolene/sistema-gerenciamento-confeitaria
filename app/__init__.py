@@ -17,4 +17,4 @@ def create_app():
         from app import models
         db.create_all()
 
-    return app# Inicialização da aplicação Flask.
+       return app
