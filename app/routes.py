@@ -2,6 +2,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
+from sqlalchemy import or_
 
 from app.extensions import db
 from app.models import Cliente, Pedido
@@ -114,14 +115,24 @@ def pedidos():
             db.session.rollback()
             flash("Confira os dados informados no pedido.", "erro")
 
-    lista_pedidos = Pedido.query.order_by(
+    termo_busca = request.args.get("busca", "").strip()
+    consulta_pedidos = Pedido.query.join(Cliente)
+
+    if termo_busca:
+        filtro = f"%{termo_busca}%"
+        consulta_pedidos = consulta_pedidos.filter(
+            or_(Cliente.nome.ilike(filtro), Pedido.produto.ilike(filtro))
+        )
+
+    lista_pedidos = consulta_pedidos.order_by(
         Pedido.data_entrega.asc()
     ).all()
 
     return render_template(
         "pedidos.html",
         pedidos=lista_pedidos,
-        clientes=lista_clientes
+        clientes=lista_clientes,
+        termo_busca=termo_busca
     )
 
 
