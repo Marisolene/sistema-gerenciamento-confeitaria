@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Confeitaria em Ordem{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header class="topo">
+        <div class="marca">
+            <span class="marca-icone">✿</span>
+            <div><strong>Confeitaria em Ordem</strong><small>Organização de encomendas</small></div>
+        </div>
+        <nav aria-label="Navegação principal">
+            <a href="{{ url_for('main.index') }}">Início</a>
+            <a href="{{ url_for('main.clientes') }}">Clientes</a>
+            <a href="{{ url_for('main.pedidos') }}">Pedidos</a>
+        </nav>
+    </header>
+    <main class="container">
+        {% with mensagens = get_flashed_messages(with_categories=true) %}
+            {% if mensagens %}
+                {% for categoria, mensagem in mensagens %}
+                    <div class="alerta {{ categoria }}" role="status">{{ mensagem }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </main>
+    <footer>Projeto acadêmico · Sistema de gerenciamento de pedidos para pequenas confeitarias</footer>
+</body>
+</html>
