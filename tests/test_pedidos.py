@@ -54,3 +54,33 @@ def test_atualiza_status(client, app):
     )
     assert resposta.status_code == 200
     assert "Em preparo".encode() in resposta.data
+
+
+def test_busca_pedido_por_cliente_ou_produto(client, app):
+    with app.app_context():
+        cliente = Cliente(nome="Maria Oliveira", telefone="11977776666")
+        db.session.add(cliente)
+        db.session.flush()
+        pedido = Pedido(
+            id_cliente=cliente.id_cliente,
+            produto="Bolo de cenoura",
+            quantidade=1,
+            valor_total=45,
+            data_pedido=date.today(),
+            data_entrega=date.today(),
+            status="Pendente",
+        )
+        db.session.add(pedido)
+        db.session.commit()
+
+    por_cliente = client.get("/pedidos?busca=Maria")
+    assert por_cliente.status_code == 200
+    assert "Bolo de cenoura".encode() in por_cliente.data
+
+    por_produto = client.get("/pedidos?busca=cenoura")
+    assert por_produto.status_code == 200
+    assert "Maria Oliveira".encode() in por_produto.data
+
+    sem_resultado = client.get("/pedidos?busca=inexistente")
+    assert sem_resultado.status_code == 200
+    assert "Nenhum pedido encontrado".encode() in sem_resultado.data
