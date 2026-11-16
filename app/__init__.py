@@ -3,21 +3,19 @@ from config import Config
 from app.extensions import db
 
 
-def create_app():
+def create_app(test_config=None):
     app = Flask(__name__)
-
-    # Carrega as configurações do projeto
     app.config.from_object(Config)
 
-    # Inicializa o banco de dados
+    if test_config:
+        app.config.update(test_config)
+
     db.init_app(app)
 
-    # Importa os modelos e cria as tabelas
     with app.app_context():
         from app import models
         db.create_all()
 
-    # Registra as rotas do sistema
     from app.routes import main
     app.register_blueprint(main)
 

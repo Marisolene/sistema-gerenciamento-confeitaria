@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Confeitaria em Ordem{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header class="topo">
+        <div class="marca">
+            <span class="marca-icone" aria-hidden="true">✿</span>
+            <div><strong>Confeitaria em Ordem</strong><small>Organização de encomendas</small></div>
+        </div>
+        <div class="controles-acessibilidade" aria-label="Controles de acessibilidade">
+            <span class="rotulo-acessibilidade">Tamanho do texto</span>
+            <button class="botao-fonte" type="button" id="diminuir-fonte" aria-label="Diminuir tamanho da fonte" title="Diminuir fonte">A−</button>
+            <button class="botao-fonte" type="button" id="aumentar-fonte" aria-label="Aumentar tamanho da fonte" title="Aumentar fonte">A+</button>
+            <button class="botao-fonte" type="button" id="resetar-fonte" aria-label="Restaurar tamanho padrão da fonte" title="Restaurar tamanho padrão">A</button>
+        </div>
+        <nav aria-label="Navegação principal">
+            <a href="{{ url_for('main.index') }}">Início</a>
+            <a href="{{ url_for('main.clientes') }}">Clientes</a>
+            <a href="{{ url_for('main.pedidos') }}">Pedidos</a>
+        </nav>
+    </header>
+    <main class="container" id="conteudo-principal">
+        {% with mensagens = get_flashed_messages(with_categories=true) %}
+            {% if mensagens %}
+                {% for categoria, mensagem in mensagens %}
+                    <div class="alerta {{ categoria }}" role="status">{{ mensagem }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </main>
+    <footer>Projeto acadêmico · Sistema de gerenciamento de pedidos para pequenas confeitarias</footer>
+
+    <script>
+        (() => {
+            const raiz = document.documentElement;
+            const minimo = 0.9;
+            const maximo = 1.5;
+            const passo = 0.1;
+            let escala = 1;
+
+            try {
+                const salva = Number(localStorage.getItem('escalaFonteConfeitaria'));
+                if (salva >= minimo && salva <= maximo) escala = salva;
+            } catch (erro) {
+                // O recurso continua funcionando mesmo se o navegador bloquear o armazenamento local.
+            }
+
+            const aplicarEscala = () => {
+                raiz.style.setProperty('--escala-fonte', escala.toFixed(1));
+                const percentual = Math.round(escala * 100);
+                document.getElementById('estado-fonte').textContent = 'Tamanho do texto: ' + percentual + '%';
+                try {
+                    localStorage.setItem('escalaFonteConfeitaria', escala.toFixed(1));
+                } catch (erro) {
+                    // A alteração visual permanece ativa durante a navegação atual.
+                }
+            };
+
+            document.getElementById('diminuir-fonte').addEventListener('click', () => {
+                escala = Math.max(minimo, Math.round((escala - passo) * 10) / 10);
+                aplicarEscala();
+            });
+            document.getElementById('aumentar-fonte').addEventListener('click', () => {
+                escala = Math.min(maximo, Math.round((escala + passo) * 10) / 10);
+                aplicarEscala();
+            });
+            document.getElementById('resetar-fonte').addEventListener('click', () => {
+                escala = 1;
+                aplicarEscala();
+            });
+
+            const estado = document.createElement('span');
+            estado.id = 'estado-fonte';
+            estado.className = 'sr-only';
+            estado.setAttribute('role', 'status');
+            estado.setAttribute('aria-live', 'polite');
+            document.querySelector('.controles-acessibilidade').appendChild(estado);
+            aplicarEscala();
+        })();
+    </script>
+</body>
+</html>
