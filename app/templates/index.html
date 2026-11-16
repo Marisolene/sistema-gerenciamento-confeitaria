@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Início | Confeitaria em Ordem{% endblock %}
+{% block content %}
+<section class="boas-vindas">
+    <div><p class="sobretitulo">PAINEL DE CONTROLE</p><h1>Seus pedidos, em ordem.</h1>
+    <p class="texto-leve">Acompanhe as encomendas e mantenha as informações importantes em um só lugar.</p></div>
+    <a class="botao" href="{{ url_for('main.pedidos') }}">＋ Novo pedido</a>
+</section>
+<section class="resumo">
+    <article class="cartao-resumo"><span>Pedidos cadastrados</span><strong>{{ pedidos|length }}</strong></article>
+    <article class="cartao-resumo"><span>Pendentes</span><strong>{{ pedidos|selectattr('status', 'equalto', 'Pendente')|list|length }}</strong></article>
+    <article class="cartao-resumo"><span>Em preparo</span><strong>{{ pedidos|selectattr('status', 'equalto', 'Em preparo')|list|length }}</strong></article>
+    <article class="cartao-resumo"><span>Prontos</span><strong>{{ pedidos|selectattr('status', 'equalto', 'Pronto')|list|length }}</strong></article>
+</section>
+<section class="painel">
+    <div class="titulo-secao"><div><p class="sobretitulo">ACOMPANHAMENTO</p><h2>Pedidos recentes</h2></div><a href="{{ url_for('main.pedidos') }}">Ver todos</a></div>
+    {% if pedidos %}
+    <div class="tabela-responsiva"><table><thead><tr><th>Cliente</th><th>Produto</th><th>Entrega</th><th>Status</th></tr></thead><tbody>
+    {% for pedido in pedidos[:8] %}
+    <tr><td>{{ pedido.cliente.nome }}</td><td>{{ pedido.produto }}</td><td>{{ pedido.data_entrega.strftime('%d/%m/%Y') }}</td><td><span class="status {{ pedido.status|lower|replace(' ', '-') }}">{{ pedido.status }}</span></td></tr>
+    {% endfor %}
+    </tbody></table></div>
+    {% else %}<div class="vazio"><span>♡</span><h3>Nenhum pedido cadastrado</h3><p>Quando você cadastrar uma encomenda, ela aparecerá aqui.</p><a class="botao secundario" href="{{ url_for('main.pedidos') }}">Cadastrar primeiro pedido</a></div>{% endif %}
+</section>
+{% endblock %}
